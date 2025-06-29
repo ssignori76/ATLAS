@@ -1,14 +1,3 @@
-Assolutamente. Hai ragione, dare visibilità alle epiche è importante.
-
-Una pratica comune è tenere il `README.md` principale conciso, focalizzato su cos'è il progetto e come avviarlo rapidamente. Poi, si inserisce un riassunto delle funzionalità principali e un link al documento di dettaglio.
-
-Ecco una bozza di `README.md` che segue questo approccio: riassume le epiche e linka al file nella cartella `docs` per gli approfondimenti, mantenendo la pagina principale pulita e funzionale.
-
------
-
-Puoi copiare e incollare questo testo direttamente nel tuo file `README.md`.
-
-````markdown
 # 🤖 Progetto Atlas: Collaboratore AI per Infrastrutture
 
 Questo repository contiene il codice sorgente per "Atlas", un assistente basato su IA progettato per automatizzare il design, il provisioning e il testing di infrastrutture IT. L'obiettivo è trasformare requisiti di alto livello in ambienti funzionanti e documentati, riducendo il lavoro manuale e gli errori.
