@@ -1,4 +1,4 @@
-# 🤖 Progetto Atlas: Collaboratore AI per Infrastrutture
+# 🤖 Progetto Atlas: Collaboratore AI per il T&A
 
 Questo repository contiene il codice sorgente per "Atlas", un assistente basato su IA progettato per automatizzare il design, il provisioning e il testing di infrastrutture IT. L'obiettivo è trasformare requisiti di alto livello in ambienti funzionanti e documentati, riducendo il lavoro manuale e gli errori.
 
