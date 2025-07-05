@@ -71,6 +71,15 @@ from .models import (
     TerraformConfig,
 )
 
+from .conversation_state import (
+    ConversationStateManager,
+    ConversationStateConfig,
+    JSONPersistenceBackend,
+    SQLitePersistenceBackend,
+    get_state_manager,
+    reset_state_manager,
+)
+
 from .llm_client import (
     LLMClient,
     LLMClientError,
@@ -146,6 +155,14 @@ __all__ = [
     "ValidationResult",
     "InventoryEntry",
     "TerraformConfig",
+    
+    # Conversation State Management
+    "ConversationStateManager",
+    "ConversationStateConfig",
+    "JSONPersistenceBackend",
+    "SQLitePersistenceBackend",
+    "get_state_manager",
+    "reset_state_manager",
     
     # LLM Client
     "LLMClient",
