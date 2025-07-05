@@ -86,6 +86,81 @@ class DiskConfig(BaseModel):
         return v
 
 
+class SoftwarePackage(BaseModel):
+    """Software package specification with optional versioning."""
+    
+    name: str = Field(description="Package name (e.g., 'nginx', 'postgresql', 'docker')")
+    version: Optional[str] = Field(None, description="Specific version (e.g., '1.20.2', 'latest', '~14.0')")
+    source: Optional[str] = Field(None, description="Package source (e.g., 'apt', 'snap', 'docker', 'custom')")
+    config: Optional[Dict[str, Any]] = Field(None, description="Package-specific configuration")
+    enabled: bool = Field(default=True, description="Enable/start service after installation")
+    
+    @validator('version')
+    def validate_version(cls, v):
+        """Validate version format."""
+        if v is None:
+            return v
+        
+        # Allow common version patterns
+        valid_patterns = [
+            'latest', 'stable', 'lts',  # Special versions
+        ]
+        
+        if v in valid_patterns:
+            return v
+        
+        # Allow semantic versioning and ranges
+        import re
+        semver_pattern = r'^[~^]?\d+(\.\d+)*(-\w+)?(\+\w+)?$'
+        if re.match(semver_pattern, v):
+            return v
+        
+        raise ValueError(f"Invalid version format: {v}. Use semantic versioning, ranges (~1.2, ^2.0), or 'latest'")
+    
+    @root_validator
+    def set_default_source(cls, values):
+        """Set default source based on package name."""
+        name = values.get('name')
+        source = values.get('source')
+        
+        if source is None and name:
+            # Default source mapping
+            source_mapping = {
+                'nginx': 'apt',
+                'apache2': 'apt', 
+                'postgresql': 'apt',
+                'mysql': 'apt',
+                'docker': 'docker.io',
+                'nodejs': 'snap',
+                'python': 'apt',
+                'redis': 'apt',
+                'mongodb': 'apt',
+                'elasticsearch': 'apt',
+                'kibana': 'apt',
+                'grafana': 'apt',
+                'prometheus': 'apt',
+            }
+            values['source'] = source_mapping.get(name.lower(), 'apt')
+        
+        return values
+
+
+class SecurityConfig(BaseModel):
+    """Security configuration for VM."""
+    
+    firewall_enabled: bool = Field(default=True, description="Enable host firewall")
+    ssh_port: PositiveInt = Field(default=22, description="SSH port")
+    fail2ban: bool = Field(default=True, description="Install and configure fail2ban")
+    automatic_updates: bool = Field(default=True, description="Enable automatic security updates")
+    allowed_ssh_users: List[str] = Field(default_factory=list, description="Users allowed to SSH")
+    sudo_users: List[str] = Field(default_factory=list, description="Users with sudo access")
+    
+    # Advanced security options
+    disable_root_login: bool = Field(default=True, description="Disable root SSH login")
+    password_authentication: bool = Field(default=False, description="Allow password authentication")
+    ufw_rules: List[str] = Field(default_factory=list, description="Custom UFW firewall rules")
+
+
 class VMSpec(BaseModel):
     """Complete VM specification."""
     
@@ -118,6 +193,12 @@ class VMSpec(BaseModel):
     ssh_keys: List[str] = Field(default_factory=list, description="SSH public keys")
     user: Optional[str] = Field(None, description="Default user name")
     password: Optional[str] = Field(None, description="Default user password")
+    
+    # Software configuration
+    software: List[SoftwarePackage] = Field(default_factory=list, description="Software packages to install")
+    
+    # Security configuration
+    security: SecurityConfig = Field(default_factory=SecurityConfig, description="Security settings")
     
     # Advanced options
     start_at_boot: bool = Field(default=False, description="Start VM at boot")
@@ -343,3 +424,15 @@ class TerraformConfig(BaseModel):
     variables: Dict[str, Any] = Field(default_factory=dict, description="Input variables")
     outputs: Dict[str, Any] = Field(default_factory=dict, description="Output definitions")
     resources: Dict[str, Any] = Field(default_factory=dict, description="Resource definitions")
+    
+    firewall_enabled: bool = Field(default=True, description="Enable host firewall")
+    ssh_port: PositiveInt = Field(default=22, description="SSH port")
+    fail2ban: bool = Field(default=True, description="Install and configure fail2ban")
+    automatic_updates: bool = Field(default=True, description="Enable automatic security updates")
+    allowed_ssh_users: List[str] = Field(default_factory=list, description="Users allowed to SSH")
+    sudo_users: List[str] = Field(default_factory=list, description="Users with sudo access")
+    
+    # Advanced security options
+    disable_root_login: bool = Field(default=True, description="Disable root SSH login")
+    password_authentication: bool = Field(default=False, description="Allow password authentication")
+    ufw_rules: List[str] = Field(default_factory=list, description="Custom UFW firewall rules")

@@ -34,6 +34,7 @@ Welcome to the ATLAS documentation hub. This directory contains comprehensive gu
 | Guide | Description | Use Case |
 |-------|-------------|----------|
 | [Basic Provisioning](./user-guide/basic-provisioning.md) | Create your first VM | Beginners |
+| [**Software Versioning**](./software-versioning.md) | Optional software versions & automatic latest | All Users |
 | [Advanced Scenarios](./user-guide/advanced-scenarios.md) | Complex multi-VM deployments | Power Users |
 | [Template System](./user-guide/templates.md) | Using and creating templates | Template Authors |
 | [Monitoring & Logging](./user-guide/monitoring.md) | Operational monitoring | Operations Teams |
