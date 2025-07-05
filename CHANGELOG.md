@@ -1,36 +1,98 @@
-# CHANGELOG
+# Changelog
 
-Tutte le modifiche significative del progetto ATLAS saranno documentate in questo file.
+All notable changes to the ATLAS project will be documented in this file.
 
-Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-e questo progetto aderisce al [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
 ### Added
-- Setup iniziale del progetto ATLAS
-- Documento requisiti completo e dettagliato
-- README principale con overview completa
-- Struttura base della documentazione
-- Configurazione esempio per Proxmox
+- Complete MVP base structure implementation
+- Professional CLI interface with Rich UI components
+- Comprehensive configuration management system
+- Structured error handling with custom exception hierarchy
+- Development tooling setup (Black, Pylint, MyPy, Pytest)
+- Package configuration with pyproject.toml
+- Agent foundation structure for AutoGen integration
 
 ### Changed
-- Organizzazione file documentazione in directory dedicata
-
-### Planned
-- Implementazione MVP con agenti base
-- Sistema di testing completo
-- CI/CD pipeline con GitHub Actions
+- Project structure reorganized for scalability
+- Documentation moved to dedicated `docs/` directory
+- Requirements consolidated and organized by purpose
 
 ## [0.1.0] - 2025-07-05
 
 ### Added
-- Creazione repository ATLAS
-- Branch fase1 per sviluppo incrementale
-- Documento requisiti iniziale
-- Configurazione git e struttura base
+- Initial project setup and repository structure
+- Complete requirements analysis and documentation
+- AI-friendly development specifications
+- README with comprehensive project overview
+- Contributing guidelines and development setup
+- Requirements documentation in dedicated directory
 
-### Context
-- Progetto iniziato per automatizzare deployment VM su Proxmox
-- Utilizzo Microsoft AutoGen per agenti AI
-- Focus su manutenibilità e sviluppo AI-assisted
+### Technical Implementation
+- **Configuration System**: Pydantic-based config with YAML/JSON/ENV support
+- **CLI Interface**: Click-based commands with Rich styling and interactive elements
+- **Error Handling**: Custom exception hierarchy with context and error codes
+- **Package Management**: Modern pyproject.toml with optional dependencies
+- **Development Tools**: Pre-configured linting, formatting, and testing tools
+
+### Project Structure
+```
+ATLAS/
+├── atlas/                   # Core application package
+│   ├── cli.py              # Command line interface
+│   ├── core/               # Core functionality
+│   │   ├── config.py       # Configuration management
+│   │   └── exceptions.py   # Custom exceptions
+│   └── agents/             # AutoGen agents (foundation)
+├── docs/                   # Documentation
+│   └── requirements/       # Requirements specifications
+├── pyproject.toml          # Modern Python packaging
+├── requirements*.txt       # Dependencies
+├── CHANGELOG.md           # This file
+├── CONTRIBUTING.md        # Development guidelines
+└── README.md             # Project overview
+```
+
+### CLI Commands Available
+- `atlas init` - Initialize configuration file
+- `atlas validate` - Validate configuration
+- `atlas provision` - Start VM provisioning workflow
+- `atlas status` - Check system status
+- `atlas destroy` - Destroy VMs (with safety checks)
+
+### Configuration Features
+- **Multi-source**: YAML files, environment variables, CLI overrides
+- **Validation**: Automatic validation with descriptive error messages
+- **Security**: Vault integration and credential encryption support
+- **Flexibility**: Runtime overrides and debug modes
+
+### Next Phase Ready
+- Agent implementation framework prepared
+- Type safety and documentation standards established
+- Testing infrastructure configured
+- CI/CD pipeline foundation ready
+
+---
+
+## Release Notes
+
+### v0.1.0 - MVP Foundation
+This release establishes the complete foundation for the ATLAS system. While the AutoGen agents are not yet implemented, all infrastructure, configuration management, CLI interface, and development tools are fully functional and ready for the next development phase.
+
+**Key Achievements:**
+- ✅ Professional CLI with full configuration management
+- ✅ Robust error handling and validation
+- ✅ Modern Python packaging and development setup
+- ✅ Comprehensive documentation and contributing guidelines
+- ✅ AI-friendly code structure and type safety
+- ✅ Ready for AutoGen agent implementation
+
+**Upcoming in v0.2.0:**
+- AutoGen agents implementation
+- Interactive VM parameter collection
+- Proxmox API integration
+- Terraform and Ansible generation
+- End-to-end provisioning workflow
