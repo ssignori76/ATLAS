@@ -1,0 +1,224 @@
+**Documento di Requisiti per la Configurazione di un Sistema AutoGen per la Gestione VM Proxmox**
+
+### **Obiettivo**
+
+Realizzare un sistema basato su **AutoGen** denominato **ATLAS** (Automated Template-based Logic for Administration Systems) che consenta, tramite interazione guidata, di:
+
+- Raccogliere dall'utente tutti i parametri necessari per la creazione e configurazione di una o più VM su Proxmox.
+- Automatizzare la creazione delle VM, l'installazione del software richiesto e la generazione di documentazione e script.
+- Fornire un sistema modulare, estendibile e sicuro per l'automazione dell'infrastruttura.
+
+### **Requisiti Funzionali**
+
+1. **Raccolta e Validazione Parametri Utente**
+   - Il sistema deve, all'avvio, porre all'utente una serie di domande per raccogliere:
+     - Numero di VM da creare (1-50).
+     - Hostname di ciascuna VM (validazione DNS compliance).
+     - Risorse di ciascuna VM:
+       - CPU: 1-64 cores
+       - RAM: 512MB-1TB
+       - Disco: 10GB-10TB
+       - Storage type (local, shared, SSD, HDD)
+     - Sistema operativo desiderato (da template predefiniti Proxmox).
+     - Elenco del software da installare su ciascuna VM.
+     - Parametri di rete (IP statico/DHCP, VLAN, subnet).
+     - Parametri aggiuntivi specifici (storage, backup, tags, HA).
+   - **Validazione Input**: Tutti i parametri devono essere validati per coerenza e limiti delle risorse Proxmox disponibili.
+   - **Profili Predefiniti**: Supporto per template predefiniti (web server, database server, development, etc.).
+   - **Gestione Errori**: Validazione della connettività Proxmox e disponibilità risorse prima della creazione.
+
+2. **Creazione VM su Proxmox**
+   - Il sistema deve generare configurazioni Terraform per la creazione delle VM su Proxmox.
+   - Supporto per API Proxmox v2+ e gestione di cluster multi-nodo.
+   - Personalizzazione avanzata per ogni VM (cloud-init, networking, storage).
+   - **Rollback Strategy**: In caso di errore, possibilità di rollback automatico delle VM create parzialmente.
+   - **Template Management**: Utilizzo e gestione di template VM Proxmox esistenti.
+
+3. **Installazione e Configurazione Software**
+   - Generazione di playbook Ansible per l'installazione software per ogni VM.
+   - Script separati e modulari per ogni componente software.
+   - Supporto per:
+     - Pacchetti sistema (apt, yum, dnf)
+     - Containerizzazione (Docker, Podman)
+     - Orchestrazione (Kubernetes, Docker Compose)
+     - Database (MySQL, PostgreSQL, MongoDB)
+     - Web servers (Nginx, Apache, HAProxy)
+   - **Configuration Management**: Gestione configurazioni specifiche per ambiente (dev, test, prod).
+
+4. **Documentazione e Output Organizzato**
+   - Organizzazione strutturata dell'output:
+     ```
+     output/
+     ├── terraform/
+     ├── ansible/
+     ├── docs/
+     ├── scripts/
+     ├── inventory/
+     └── monitoring/
+     ```
+   - Generazione automatica di:
+     - README.md dettagliato con istruzioni step-by-step
+     - Diagrammi architetturali (PlantUML/Mermaid)
+     - Inventory dinamico per Ansible
+     - Script di monitoraggio base
+     - Script di backup e manutenzione
+
+5. **Monitoraggio e Manutenzione**
+   - Generazione script per monitoring base delle VM
+   - Template per alerting e log management
+   - Script automatici per backup configurazioni
+   - Health check automatici post-deployment
+
+### **Requisiti Tecnici**
+
+1. **Architettura AutoGen Multi-Agente**
+   - **DataCollectorAgent**: Raccolta e validazione parametri utente (human-in-the-loop)
+   - **ValidationAgent**: Validazione input e verifica risorse Proxmox
+   - **ProxmoxConfigAgent**: Generazione configurazioni Terraform per Proxmox
+   - **SoftwareProvisionAgent**: Generazione playbook Ansible per software
+   - **DocumentationAgent**: Creazione documentazione e diagrammi
+   - **OrchestratorAgent**: Coordinamento workflow e gestione stati
+   
+   La comunicazione tra agenti deve seguire un pattern orchestrato con:
+   - Passing di dati validati tra agenti
+   - Error handling e rollback capabilities
+   - Logging dettagliato per ogni fase
+
+2. **Specifiche Tecniche e Dipendenze**
+   - **Python 3.10+** con supporto type hints
+   - **AutoGen Framework** per orchestrazione agenti
+   - **Librerie richieste**:
+     - `proxmoxer` per API Proxmox
+     - `python-terraform` per gestione Terraform
+     - `pyyaml` per configurazioni
+     - `jinja2` per template
+     - `click` per CLI interface
+     - `pydantic` per validazione dati
+   - **API Proxmox v2+** supportate
+   - **Terraform Provider** per Proxmox
+
+3. **Modalità Operativa**
+   - **Fase Interattiva**: `human_input_mode="ALWAYS"` per raccolta dati
+   - **Fase Automatica**: Esecuzione orchestrata senza intervento umano
+   - **Modalità Dry-Run**: Simulazione senza applicazione modifiche
+   - **Modalità Verbose**: Logging dettagliato per debugging
+
+4. **Estendibilità e Modularità**
+   - **Plugin System**: Framework per aggiungere nuovi agenti
+   - **Template Engine**: Sistema template per nuovi software/configurazioni
+   - **Configuration Schema**: JSON Schema per validazione configurazioni
+   - **Hook System**: Callback personalizzabili per estensioni
+
+5. **Sicurezza e Configurabilità**
+   - **Gestione Credenziali**: 
+     - Variabili d'ambiente per credenziali sensibili
+     - Supporto HashiCorp Vault per secrets
+     - Crittografia file configurazione con chiavi
+   - **Audit Trail**: Log completo di tutte le operazioni
+   - **Rate Limiting**: Controllo chiamate API Proxmox
+   - **Permissions**: Validazione permessi utente Proxmox
+
+6. **Logging e Monitoring**
+   - **Structured Logging**: JSON format per parsing automatico
+   - **Log Levels**: DEBUG, INFO, WARNING, ERROR, CRITICAL
+   - **Log Rotation**: Gestione automatica dimensioni log
+   - **Metrics**: Collezione metriche performance e usage
+
+### **Vincoli e Considerazioni**
+
+- **Safety First**: Il sistema produce SOLO file e documentazione, NON applica modifiche a Proxmox (salvo flag esplicito `--apply`)
+- **Idempotenza**: Tutte le operazioni devono essere idempotenti
+- **Backward Compatibility**: Supporto versioni precedenti configurazioni
+- **Cross-Platform**: Compatibilità Linux, macOS, Windows
+- **Resource Limits**: Validazione limiti risorse prima dell'esecuzione
+- **Network Isolation**: Supporto per reti isolate e air-gapped
+
+### **Output Atteso**
+
+1. **Codice Python Strutturato**:
+   ```
+   atlas/
+   ├── agents/
+   │   ├── data_collector.py
+   │   ├── validator.py
+   │   ├── proxmox_config.py
+   │   ├── software_provision.py
+   │   ├── documentation.py
+   │   └── orchestrator.py
+   ├── config/
+   │   ├── schemas/
+   │   ├── templates/
+   │   └── profiles/
+   ├── generators/
+   │   ├── terraform/
+   │   ├── ansible/
+   │   └── docs/
+   ├── utils/
+   │   ├── validators.py
+   │   ├── helpers.py
+   │   └── logging.py
+   ├── tests/
+   └── main.py
+   ```
+
+2. **Configurazioni e Template**:
+   - File configurazione YAML con schema validation
+   - Template Jinja2 per Terraform e Ansible
+   - Profili predefiniti per scenari comuni
+   - File di esempio e documentazione
+
+3. **Testing Framework**:
+   - Unit test per ogni agente (pytest)
+   - Integration test con Proxmox sandbox
+   - End-to-end test con scenari reali
+   - Performance test per scalabilità
+
+4. **Documentazione Completa**:
+   - README.md principale con quick start
+   - Documentazione API per ogni agente
+   - Esempi d'uso e best practices
+   - Troubleshooting guide
+
+### **Fasi di Sviluppo Incrementale**
+
+**Fase 1 - MVP (Minimum Viable Product)**:
+- DataCollectorAgent base
+- ValidationAgent essenziale
+- Generazione Terraform semplice
+- Output strutturato base
+
+**Fase 2 - Core Features**:
+- Tutti gli agenti principali
+- Generazione Ansible completa
+- Sistema template avanzato
+- Documentazione automatica
+
+**Fase 3 - Advanced Features**:
+- Plugin system
+- Interfaccia web (opzionale)
+- Integration CI/CD
+- Monitoring avanzato
+
+**Fase 4 - Enterprise Features**:
+- Multi-tenant support
+- RBAC e audit
+- API REST
+- High availability
+
+### **Metriche di Successo**
+
+- **Functional**: 100% dei requisiti funzionali implementati
+- **Performance**: < 30 secondi per generare configurazione 10 VM
+- **Reliability**: 99.9% success rate in test scenarios
+- **Usability**: < 5 minuti per utente nuovo per prima configurazione
+- **Maintainability**: Code coverage > 90%
+
+### **Note Aggiuntive**
+
+- **User Experience**: Focus su semplicità d'uso e feedback chiari
+- **Error Recovery**: Strategie robuste per recovery da errori
+- **Community**: Struttura per contributi community e plugin
+- **Documentation**: Ogni componente deve essere auto-documentato
+- **Versioning**: Semantic versioning per rilasci
+
+**Fine documento aggiornato**
