@@ -215,18 +215,49 @@ class ConversationManager:
         self.logger.info(f"Started conversation {context.id} with flow {flow_name}")
         return context
     
+    async def load_conversation(
+        self,
+        conversation_id: str,
+        state_manager: Optional[Any] = None
+    ) -> Optional[ConversationContext]:
+        """Load conversation from storage if not in memory."""
+        
+        # Check if already in memory
+        if conversation_id in self.active_conversations:
+            return self.active_conversations[conversation_id]
+        
+        # Load from storage if state manager provided
+        if state_manager:
+            context = await state_manager.load_conversation(conversation_id)
+            if context:
+                self.active_conversations[conversation_id] = context
+                self.logger.info(f"Loaded conversation {conversation_id} from storage")
+                return context
+        
+        return None
+    
+    async def ensure_conversation_loaded(
+        self,
+        conversation_id: str,
+        state_manager: Optional[Any] = None
+    ) -> ConversationContext:
+        """Ensure conversation is loaded in memory, raise error if not found."""
+        
+        context = await self.load_conversation(conversation_id, state_manager)
+        if not context:
+            raise ConversationError(f"Conversation {conversation_id} not found")
+        return context
+
     async def continue_conversation(
         self,
         conversation_id: str,
         user_input: Optional[Dict[str, Any]] = None,
         target_stage: Optional[FlowStage] = None,
+        state_manager: Optional[Any] = None,
     ) -> ConversationContext:
         """Continue an existing conversation."""
         
-        if conversation_id not in self.active_conversations:
-            raise ConversationError(f"Conversation {conversation_id} not found")
-        
-        context = self.active_conversations[conversation_id]
+        context = await self.ensure_conversation_loaded(conversation_id, state_manager)
         flow = self.flows[context.metadata["flow_name"]]
         
         if user_input:
@@ -249,13 +280,11 @@ class ConversationManager:
         self,
         conversation_id: str,
         stage: Optional[FlowStage] = None,
+        state_manager: Optional[Any] = None,
     ) -> Dict[str, Any]:
         """Process a specific conversation stage with appropriate agents."""
         
-        if conversation_id not in self.active_conversations:
-            raise ConversationError(f"Conversation {conversation_id} not found")
-        
-        context = self.active_conversations[conversation_id]
+        context = await self.ensure_conversation_loaded(conversation_id, state_manager)
         target_stage = stage or context.current_stage
         flow = self.flows[context.metadata["flow_name"]]
         

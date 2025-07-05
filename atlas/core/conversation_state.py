@@ -266,7 +266,21 @@ class SQLitePersistenceBackend(PersistenceBackend):
     
     def __init__(self, db_path: Union[str, Path] = None):
         """Initialize SQLite persistence backend."""
-        self.db_path = Path(db_path or Path.home() / ".atlas" / "conversations.db")
+        if db_path:
+            # If db_path is provided, use it as a directory and create db file inside
+            if isinstance(db_path, str):
+                db_path = Path(db_path)
+            if db_path.is_dir() or not db_path.suffix:
+                # It's a directory, create db file inside it
+                self.db_path = db_path / "conversations.db"
+            else:
+                # It's a file path
+                self.db_path = db_path
+        else:
+            # Default location
+            self.db_path = Path.home() / ".atlas" / "conversations.db"
+        
+        # Ensure parent directory exists
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.logger = get_logger(self.__class__.__name__)
         self._db_initialized = False
@@ -587,6 +601,15 @@ class ConversationStateManager:
             # Cache if found
             if context:
                 self.cached_contexts[conversation_id] = context
+                
+                # Manage cache size
+                if len(self.cached_contexts) > self.config.max_contexts_in_memory:
+                    # Remove oldest cached context
+                    oldest_id = min(self.cached_contexts.keys(), 
+                                  key=lambda x: self.cached_contexts[x].updated_at)
+                    del self.cached_contexts[oldest_id]
+                    self.logger.debug(f"Evicted context {oldest_id} from cache")
+                
                 self.logger.debug(f"Loaded and cached conversation {conversation_id}")
             
             return context
@@ -761,28 +784,33 @@ class ConversationStateManager:
         self.logger.info("Conversation cache cleared")
     
     async def get_stats(self) -> Dict[str, Any]:
-        """Get conversation statistics."""
+        """Get conversation system statistics."""
         try:
-            stats = {
-                "cached_contexts": len(self.cached_contexts),
-                "backend_type": self.config.backend_type,
-            }
+            all_conversations = await self.list_conversations()
             
-            # Get status counts
-            all_contexts = await self.list_conversations()
+            # Count by status
             status_counts = {}
-            for ctx in all_contexts:
-                status = ctx["status"]
+            for conv in all_conversations:
+                status = conv.get('status', 'unknown')
                 status_counts[status] = status_counts.get(status, 0) + 1
             
-            stats["status_counts"] = status_counts
-            stats["total_conversations"] = len(all_contexts)
+            stats = {
+                'total_conversations': len(all_conversations),
+                'cached_conversations': len(self.cached_contexts),
+                'backend_type': self.config.backend_type,
+                'status_counts': status_counts,
+                'max_cache_size': self.config.max_contexts_in_memory,
+            }
             
             return stats
             
         except Exception as e:
             self.logger.error(f"Failed to get stats: {e}")
-            return {"error": str(e)}
+            return {
+                'error': str(e),
+                'cached_conversations': len(self.cached_contexts),
+                'backend_type': self.config.backend_type,
+            }
 
 
 # Global state manager instance
