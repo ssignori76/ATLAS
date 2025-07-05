@@ -9,6 +9,7 @@ from .config import (
     AtlasConfig,
     ProxmoxConfig,
     VMDefaults,
+    LLMConfig,
     SystemConfig,
     ConfigManager,
     get_config,
@@ -68,6 +69,13 @@ from .models import (
     TerraformConfig,
 )
 
+from .llm_client import (
+    LLMClient,
+    LLMClientError,
+    get_llm_client,
+    create_completion,
+)
+
 # Version information
 __version__ = "0.1.0"
 __author__ = "ATLAS Development Team"
@@ -79,6 +87,7 @@ __all__ = [
     "AtlasConfig",
     "ProxmoxConfig", 
     "VMDefaults",
+    "LLMConfig",
     "SystemConfig",
     "ConfigManager",
     "get_config",
@@ -133,6 +142,12 @@ __all__ = [
     "ValidationResult",
     "InventoryEntry",
     "TerraformConfig",
+    
+    # LLM Client
+    "LLMClient",
+    "LLMClientError", 
+    "get_llm_client",
+    "create_completion",
     
     # Package info
     "__version__",

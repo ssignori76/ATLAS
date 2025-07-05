@@ -1,0 +1,65 @@
+# ATLAS Configuration Example
+# Copy this file to atlas.yaml and customize for your environment
+
+# Proxmox VE Configuration
+proxmox:
+  host: "your-proxmox-host.example.com"
+  port: 8006
+  user: "root@pam"
+  # Option 1: Use password authentication
+  password: "your_proxmox_password"
+  # Option 2: Use API token authentication (recommended)
+  # token_name: "your_token_name"
+  # token_value: "your_token_value"
+  verify_ssl: false
+  timeout: 30
+
+# LLM Configuration
+llm:
+  # Provider options: openai, azure, anthropic, local
+  provider: "openai"
+  
+  # For OpenAI
+  api_key: "sk-your_openai_api_key_here"
+  model_name: "gpt-4"
+  temperature: 0.7
+  max_tokens: 4000
+  timeout: 60
+  
+  # For Azure OpenAI (uncomment and configure)
+  # provider: "azure"
+  # api_key: "your_azure_openai_api_key"
+  # azure_endpoint: "https://your-resource.openai.azure.com/"
+  # azure_deployment_name: "your-gpt-4-deployment"
+  # azure_api_version: "2024-02-15-preview"
+  
+  # For Anthropic Claude (uncomment and configure)
+  # provider: "anthropic"
+  # api_key: "sk-ant-your_anthropic_api_key_here"
+  # model_name: "claude-3-sonnet-20240229"
+  
+  # For local models (uncomment and configure)
+  # provider: "local"
+  # local_model_path: "/path/to/your/local/model"
+  # local_api_port: 8000
+  # api_base_url: "http://localhost:8000/v1"
+
+# Default VM Settings
+vm_defaults:
+  memory: 2048  # MB
+  cores: 2
+  disk_size: "20G"
+  disk_storage: "local-lvm"
+  network_bridge: "vmbr0"
+  os_type: "l26"  # Linux 2.6+
+  template_id: null  # Set to your template VM ID
+
+# System Configuration
+system:
+  work_dir: "~/.atlas"
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_file: null  # Set to a file path to enable file logging
+  terraform_path: "terraform"
+  ansible_path: "ansible-playbook"
+  backup_configs: true
+  dry_run_default: false

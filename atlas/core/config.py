@@ -11,6 +11,13 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional
 from dataclasses import dataclass, field
+
+try:
+    from dotenv import load_dotenv
+    DOTENV_AVAILABLE = True
+except ImportError:
+    DOTENV_AVAILABLE = False
+
 from .exceptions import ConfigurationError
 
 
@@ -42,6 +49,28 @@ class VMDefaults:
     
     
 @dataclass
+class LLMConfig:
+    """Configuration for LLM services (OpenAI, Azure OpenAI, etc.)."""
+    
+    provider: str = "openai"  # openai, azure, anthropic, local
+    api_key: Optional[str] = None
+    api_base_url: Optional[str] = None
+    model_name: str = "gpt-4"
+    temperature: float = 0.7
+    max_tokens: int = 4000
+    timeout: int = 60
+    
+    # Azure-specific settings
+    azure_endpoint: Optional[str] = None
+    azure_api_version: str = "2024-02-15-preview"
+    azure_deployment_name: Optional[str] = None
+    
+    # Local model settings
+    local_model_path: Optional[str] = None
+    local_api_port: int = 8000
+
+
+@dataclass
 class SystemConfig:
     """System-wide configuration settings."""
     
@@ -60,6 +89,7 @@ class AtlasConfig:
     
     proxmox: ProxmoxConfig = field(default_factory=ProxmoxConfig)
     vm_defaults: VMDefaults = field(default_factory=VMDefaults)
+    llm: LLMConfig = field(default_factory=LLMConfig)
     system: SystemConfig = field(default_factory=SystemConfig)
     
     def __post_init__(self):
@@ -73,6 +103,24 @@ class AtlasConfig:
                 (self.proxmox.token_name and self.proxmox.token_value)):
             raise ConfigurationError(
                 "Either password or token authentication must be configured"
+            )
+        
+        # Validate LLM configuration
+        if self.llm.provider in ["openai", "anthropic"] and not self.llm.api_key:
+            raise ConfigurationError(
+                f"API key is required for {self.llm.provider} provider"
+            )
+        
+        if self.llm.provider == "azure" and not (
+            self.llm.api_key and self.llm.azure_endpoint and self.llm.azure_deployment_name
+        ):
+            raise ConfigurationError(
+                "Azure OpenAI requires api_key, azure_endpoint, and azure_deployment_name"
+            )
+        
+        if self.llm.provider == "local" and not self.llm.local_model_path:
+            raise ConfigurationError(
+                "Local provider requires local_model_path"
             )
         
         # Validate work directory
@@ -113,6 +161,17 @@ class ConfigManager:
         """
         if self._config is not None:
             return self._config
+        
+        # Load .env file if available
+        if DOTENV_AVAILABLE:
+            env_files = [
+                Path.cwd() / ".env",
+                Path.home() / ".atlas" / ".env",
+            ]
+            for env_file in env_files:
+                if env_file.exists():
+                    load_dotenv(env_file)
+                    break
         
         config_data = {}
         
@@ -171,6 +230,7 @@ class ConfigManager:
     def _apply_env_overrides(self, config_data: Dict[str, Any]) -> Dict[str, Any]:
         """Apply environment variable overrides to configuration."""
         env_mappings = {
+            # Proxmox settings
             'ATLAS_PROXMOX_HOST': ['proxmox', 'host'],
             'ATLAS_PROXMOX_PORT': ['proxmox', 'port'],
             'ATLAS_PROXMOX_USER': ['proxmox', 'user'],
@@ -178,6 +238,25 @@ class ConfigManager:
             'ATLAS_PROXMOX_TOKEN_NAME': ['proxmox', 'token_name'],
             'ATLAS_PROXMOX_TOKEN_VALUE': ['proxmox', 'token_value'],
             'ATLAS_PROXMOX_VERIFY_SSL': ['proxmox', 'verify_ssl'],
+            
+            # LLM settings
+            'ATLAS_LLM_PROVIDER': ['llm', 'provider'],
+            'ATLAS_LLM_API_KEY': ['llm', 'api_key'],
+            'ATLAS_LLM_API_BASE_URL': ['llm', 'api_base_url'],
+            'ATLAS_LLM_MODEL_NAME': ['llm', 'model_name'],
+            'ATLAS_LLM_TEMPERATURE': ['llm', 'temperature'],
+            'ATLAS_LLM_MAX_TOKENS': ['llm', 'max_tokens'],
+            'ATLAS_LLM_AZURE_ENDPOINT': ['llm', 'azure_endpoint'],
+            'ATLAS_LLM_AZURE_DEPLOYMENT_NAME': ['llm', 'azure_deployment_name'],
+            'ATLAS_LLM_LOCAL_MODEL_PATH': ['llm', 'local_model_path'],
+            
+            # OpenAI compatibility
+            'OPENAI_API_KEY': ['llm', 'api_key'],
+            'OPENAI_BASE_URL': ['llm', 'api_base_url'],
+            'AZURE_OPENAI_ENDPOINT': ['llm', 'azure_endpoint'],
+            'AZURE_OPENAI_API_KEY': ['llm', 'api_key'],
+            
+            # System settings
             'ATLAS_LOG_LEVEL': ['system', 'log_level'],
             'ATLAS_WORK_DIR': ['system', 'work_dir'],
         }
@@ -191,10 +270,12 @@ class ConfigManager:
                     current = current.setdefault(key, {})
                 
                 # Convert value to appropriate type
-                if key_path[-1] in ['port', 'timeout']:
+                if key_path[-1] in ['port', 'timeout', 'max_tokens', 'local_api_port']:
                     value = int(value)
-                elif key_path[-1] == 'verify_ssl':
+                elif key_path[-1] in ['verify_ssl']:
                     value = value.lower() in ('true', '1', 'yes', 'on')
+                elif key_path[-1] in ['temperature']:
+                    value = float(value)
                 elif key_path[-1] == 'work_dir':
                     value = Path(value)
                 
@@ -212,6 +293,10 @@ class ConfigManager:
         vm_data = data.get('vm_defaults', {})
         vm_defaults = VMDefaults(**vm_data)
         
+        # Create LLM config
+        llm_data = data.get('llm', {})
+        llm_config = LLMConfig(**llm_data)
+        
         # Create system config
         system_data = data.get('system', {})
         if 'work_dir' in system_data and isinstance(system_data['work_dir'], str):
@@ -223,6 +308,7 @@ class ConfigManager:
         return AtlasConfig(
             proxmox=proxmox_config,
             vm_defaults=vm_defaults,
+            llm=llm_config,
             system=system_config
         )
     
@@ -247,6 +333,20 @@ class ConfigManager:
                 'network_bridge': config.vm_defaults.network_bridge,
                 'os_type': config.vm_defaults.os_type,
                 'template_id': config.vm_defaults.template_id,
+            },
+            'llm': {
+                'provider': config.llm.provider,
+                'api_key': config.llm.api_key,
+                'api_base_url': config.llm.api_base_url,
+                'model_name': config.llm.model_name,
+                'temperature': config.llm.temperature,
+                'max_tokens': config.llm.max_tokens,
+                'timeout': config.llm.timeout,
+                'azure_endpoint': config.llm.azure_endpoint,
+                'azure_api_version': config.llm.azure_api_version,
+                'azure_deployment_name': config.llm.azure_deployment_name,
+                'local_model_path': config.llm.local_model_path,
+                'local_api_port': config.llm.local_api_port,
             },
             'system': {
                 'work_dir': str(config.system.work_dir),
