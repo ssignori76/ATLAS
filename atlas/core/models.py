@@ -11,8 +11,9 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 
-from pydantic import BaseModel, Field, validator, root_validator
-from pydantic.types import IPvAnyAddress, PositiveInt
+from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic.networks import IPvAnyAddress
+from pydantic.types import PositiveInt
 
 
 class VMSize(str, Enum):
@@ -48,7 +49,8 @@ class NetworkConfig(BaseModel):
     netmask: str = Field(default="255.255.255.0", description="Network mask")
     vlan_tag: Optional[PositiveInt] = Field(None, description="VLAN tag")
     
-    @validator('netmask')
+    @field_validator('netmask')
+    @classmethod
     def validate_netmask(cls, v):
         """Validate netmask format."""
         # Allow CIDR notation or dotted decimal
@@ -77,7 +79,8 @@ class DiskConfig(BaseModel):
     replicate: bool = Field(default=False, description="Enable replication")
     ssd: bool = Field(default=False, description="SSD emulation")
     
-    @validator('size')
+    @field_validator('size')
+    @classmethod
     def validate_size(cls, v):
         """Validate disk size format."""
         import re
@@ -95,7 +98,8 @@ class SoftwarePackage(BaseModel):
     config: Optional[Dict[str, Any]] = Field(None, description="Package-specific configuration")
     enabled: bool = Field(default=True, description="Enable/start service after installation")
     
-    @validator('version')
+    @field_validator('version')
+    @classmethod
     def validate_version(cls, v):
         """Validate version format."""
         if v is None:
@@ -117,7 +121,8 @@ class SoftwarePackage(BaseModel):
         
         raise ValueError(f"Invalid version format: {v}. Use semantic versioning, ranges (~1.2, ^2.0), or 'latest'")
     
-    @root_validator
+    @model_validator(mode='before')
+    @classmethod
     def set_default_source(cls, values):
         """Set default source based on package name."""
         name = values.get('name')
@@ -208,7 +213,8 @@ class VMSpec(BaseModel):
     # Size preset (alternative to manual hardware config)
     size_preset: Optional[VMSize] = Field(None, description="Use predefined size")
     
-    @root_validator
+    @model_validator(mode='before')
+    @classmethod
     def validate_os_config(cls, values):
         """Validate OS configuration consistency."""
         template_id = values.get('template_id')
@@ -222,7 +228,8 @@ class VMSpec(BaseModel):
         
         return values
     
-    @root_validator
+    @model_validator(mode='before')
+    @classmethod
     def apply_size_preset(cls, values):
         """Apply size preset if specified."""
         size_preset = values.get('size_preset')
@@ -369,7 +376,8 @@ class WorkflowConfig(BaseModel):
     timeout: PositiveInt = Field(default=3600, description="Total workflow timeout")
     
     # Validation
-    @validator('steps')
+    @field_validator('steps')
+    @classmethod
     def validate_dependencies(cls, steps):
         """Validate step dependencies form a valid DAG."""
         step_names = {step.name for step in steps}

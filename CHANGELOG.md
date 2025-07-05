@@ -5,9 +5,27 @@ All notable changes to the ATLAS project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# Changelog
+
+All notable changes to the ATLAS project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## [Unreleased]
 
 ### Added
+- **Step 1.2: Agent Conversation Flows** - Complete implementation
+  - `ConversationManager` for orchestrating multi-agent conversations
+  - `ConversationContext` for tracking conversation state and data
+  - `ConversationFlow` for defining workflow stages and transitions
+  - Support for VM provisioning workflow with 6 stages:
+    - Data Collection, Validation, Proxmox Config, Software Provision, Documentation, Completion
+  - Comprehensive error handling and recovery mechanisms
+  - Conversation lifecycle management (start, continue, complete, cancel)
+  - Status monitoring and conversation listing capabilities
+  - Flow transition validation and stage processing
+- Comprehensive test suite for conversation flows (`tests/test_agent_conversations.py`)
 - Complete MVP base structure implementation
 - Professional CLI interface with Rich UI components
 - Comprehensive configuration management system
@@ -27,6 +45,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Root README simplified to project overview and quick start
 - `docs/README.md` converted to documentation navigation hub
 - Removed content duplication between README files
+
+### Fixed
+- AutoGen import issues in `atlas/__init__.py` (fixed class name casing)
+- Decorator compatibility issues in conversation manager methods
 
 ## [0.1.0] - 2025-07-05
 

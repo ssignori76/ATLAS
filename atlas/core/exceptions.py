@@ -51,6 +51,26 @@ class ProxmoxAuthenticationError(ProxmoxError):
     pass
 
 
+class AutoGenError(AtlasError):
+    """Raised when AutoGen operations fail."""
+    
+    def __init__(self, message: str, agent_name: str = None, conversation_id: str = None):
+        """Initialize with AutoGen-specific details."""
+        super().__init__(message)
+        self.agent_name = agent_name
+        self.conversation_id = conversation_id
+
+
+class ConversationError(AutoGenError):
+    """Raised when agent conversations fail."""
+    pass
+
+
+class AgentError(AutoGenError):
+    """Raised when individual agent operations fail."""
+    pass
+
+
 class ProxmoxResourceNotFoundError(ProxmoxError):
     """Raised when requested Proxmox resource is not found."""
     pass
@@ -86,16 +106,6 @@ class AnsibleError(AtlasError):
         self.exit_code = exit_code
         self.stdout = stdout
         self.stderr = stderr
-
-
-class AgentError(AtlasError):
-    """Raised when agent operations fail."""
-    
-    def __init__(self, message: str, agent_name: str = None, agent_operation: str = None):
-        """Initialize with agent details."""
-        super().__init__(message)
-        self.agent_name = agent_name
-        self.agent_operation = agent_operation
 
 
 class WorkflowError(AtlasError):

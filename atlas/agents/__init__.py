@@ -2,8 +2,8 @@
 Agents module initialization.
 
 This module provides the agent infrastructure for the ATLAS system,
-including base agent functionality and specialized agents for different
-aspects of VM provisioning.
+including base agent functionality, specialized agents for different
+aspects of VM provisioning, and conversation management.
 """
 
 from .base import (
@@ -12,6 +12,14 @@ from .base import (
     MessageType,
     AgentMessage,
     AgentCapabilities,
+)
+
+from .conversation_manager import (
+    ConversationManager,
+    ConversationContext,
+    ConversationFlow,
+    ConversationStatus,
+    FlowStage,
 )
 
 from .data_collector import (
@@ -48,6 +56,13 @@ __all__ = [
     'MessageType',
     'AgentMessage',
     'AgentCapabilities',
+    
+    # Conversation management
+    'ConversationManager',
+    'ConversationContext',
+    'ConversationFlow',
+    'ConversationStatus',
+    'FlowStage',
     
     # Data collector
     'DataCollectorAgent',

@@ -7,12 +7,12 @@ __version__ = "0.1.0"
 __author__ = "ATLAS Development Team"
 __description__ = "AI-powered Proxmox VM provisioning system"
 
-from .core.config import ATLASConfig
-from .core.exceptions import ATLASError, ValidationError, ProxmoxError
+from .core.config import AtlasConfig
+from .core.exceptions import AtlasError, ValidationError, ProxmoxError
 
 __all__ = [
-    "ATLASConfig",
-    "ATLASError", 
+    "AtlasConfig",
+    "AtlasError", 
     "ValidationError",
     "ProxmoxError"
 ]
