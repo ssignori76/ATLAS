@@ -221,4 +221,549 @@ Realizzare un sistema basato su **AutoGen** denominato **ATLAS** (Automated Temp
 - **Documentation**: Ogni componente deve essere auto-documentato
 - **Versioning**: Semantic versioning per rilasci
 
-**Fine documento aggiornato**
+### **Specifiche per Sviluppo AI-Friendly e Manutenibilità**
+
+#### **1. Principi di Design per Agenti AI**
+
+- **Single Responsibility Principle**: Ogni classe deve avere una sola responsabilabilità ben definita
+- **Dependency Injection**: Tutte le dipendenze devono essere iniettate nei costruttori
+- **Interface Segregation**: Interfacce piccole e specifiche piuttosto che grandi interfacce monolitiche
+- **Explicit is Better**: Ogni comportamento deve essere esplicito, non implicito
+- **Fail Fast**: Validazione immediata con eccezioni chiare e informative
+
+#### **2. Struttura delle Classi - Design Patterns**
+
+**Base Classes e Interfacce**:
+```python
+# Abstract base per tutti gli agenti
+class BaseAgent(ABC):
+    """
+    Classe base astratta per tutti gli agenti ATLAS.
+    Definisce l'interfaccia comune e i comportamenti condivisi.
+    """
+    
+# Interface per validatori
+class ValidatorInterface(Protocol):
+    """Interfaccia per tutti i validatori di input."""
+    
+# Interface per generatori
+class GeneratorInterface(Protocol):
+    """Interfaccia per tutti i generatori di configurazioni."""
+```
+
+**Data Classes per Type Safety**:
+```python
+@dataclass
+class VMConfiguration:
+    """Configurazione completa per una VM."""
+    
+@dataclass
+class ProxmoxCluster:
+    """Rappresentazione di un cluster Proxmox."""
+    
+@dataclass
+class DeploymentResult:
+    """Risultato di un deployment con successi e errori."""
+```
+
+#### **3. Architettura Orientata agli Oggetti**
+
+**Ogni concetto deve essere una classe dedicata**:
+
+- **`VMSpecification`**: Classe per specifica singola VM
+- **`ResourceValidator`**: Validazione risorse hardware
+- **`NetworkConfiguration`**: Configurazione di rete dedicata
+- **`SoftwareStack`**: Stack software con dipendenze
+- **`DeploymentPlan`**: Piano di deployment completo
+- **`ConfigurationTemplate`**: Template configurazioni
+- **`AuditLogger`**: Sistema di audit dedicato
+- **`ErrorHandler`**: Gestione errori centralizzata
+
+#### **4. Documentazione e Commenti per AI**
+
+**Standard di Documentazione**:
+```python
+class DataCollectorAgent(BaseAgent):
+    """
+    Agente responsabile della raccolta dati utente.
+    
+    Questo agente gestisce l'interazione con l'utente finale,
+    pone domande strutturate e valida le risposte ricevute.
+    
+    Attributes:
+        questions_schema: Schema delle domande da porre
+        validation_rules: Regole di validazione per le risposte
+        collected_data: Dati raccolti dall'utente
+        
+    Example:
+        >>> collector = DataCollectorAgent()
+        >>> data = collector.collect_user_input()
+        >>> print(data.vm_count)  # 3
+    """
+```
+
+**Commenti Inline Esplicativi**:
+```python
+def validate_cpu_allocation(self, cpu_cores: int) -> bool:
+    """Valida l'allocazione CPU richiesta."""
+    # Verifica che il numero di core sia nel range consentito (1-64)
+    if not 1 <= cpu_cores <= 64:
+        raise ValueError(f"CPU cores must be between 1-64, got {cpu_cores}")
+    
+    # Controlla disponibilità risorse nel cluster Proxmox
+    available_cores = self.proxmox_client.get_available_cores()
+    if cpu_cores > available_cores:
+        raise ResourceError(f"Insufficient cores: requested {cpu_cores}, available {available_cores}")
+    
+    return True
+```
+
+#### **5. Error Handling e Robustezza**
+
+**Gerarchia di Eccezioni Personalizzate**:
+```python
+class ATLASError(Exception):
+    """Eccezione base per tutti gli errori ATLAS."""
+
+class ValidationError(ATLASError):
+    """Errore di validazione input utente."""
+
+class ProxmoxConnectionError(ATLASError):
+    """Errore di connessione a Proxmox."""
+
+class ResourceError(ATLASError):
+    """Errore di risorse insufficienti."""
+```
+
+**Context Managers per Resource Management**:
+```python
+class ProxmoxConnection:
+    """Context manager per connessioni Proxmox sicure."""
+    
+    def __enter__(self):
+        # Establish connection
+        return self
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # Clean up connection
+        pass
+```
+
+#### **6. Configuration Management**
+
+**Classe dedicata per configurazioni**:
+```python
+class ATLASConfig:
+    """
+    Gestione centralizzata di tutte le configurazioni ATLAS.
+    
+    Carica configurazioni da file YAML, variabili d'ambiente
+    e argomenti CLI con priorità definita.
+    """
+    
+    @classmethod
+    def from_file(cls, config_path: Path) -> 'ATLASConfig':
+        """Carica configurazione da file YAML."""
+        
+    @classmethod
+    def from_env(cls) -> 'ATLASConfig':
+        """Carica configurazione da variabili d'ambiente."""
+```
+
+#### **7. Logging Strutturato**
+
+**Logger personalizzato per AI debugging**:
+```python
+class ATLASLogger:
+    """
+    Sistema di logging strutturato per ATLAS.
+    
+    Produce log in formato JSON per parsing automatico
+    e include context per debugging AI agents.
+    """
+    
+    def log_agent_action(self, agent_name: str, action: str, context: dict):
+        """Log azione di un agente con contesto."""
+        
+    def log_user_interaction(self, question: str, answer: str, validation_result: bool):
+        """Log interazione utente con risultato validazione."""
+```
+
+#### **8. Testing Strategy per AI Development**
+
+**Test Classes dedicate**:
+```python
+class TestDataCollectorAgent:
+    """Test suite per DataCollectorAgent."""
+    
+    def test_collect_basic_vm_info(self):
+        """Test raccolta informazioni base VM."""
+        
+    def test_validation_invalid_cpu(self):
+        """Test validazione CPU con valori non validi."""
+        
+    @pytest.mark.integration
+    def test_proxmox_connection(self):
+        """Test integrazione con Proxmox reale."""
+```
+
+**Mock Classes per Testing**:
+```python
+class MockProxmoxClient:
+    """Mock client Proxmox per testing."""
+    
+class MockUserInput:
+    """Mock input utente per testing automatico."""
+```
+
+#### **9. Plugin Architecture**
+
+**Sistema plugin estendibile**:
+```python
+class PluginInterface(Protocol):
+    """Interfaccia per tutti i plugin ATLAS."""
+    
+    def initialize(self, config: ATLASConfig) -> None:
+        """Inizializza il plugin."""
+        
+    def execute(self, context: dict) -> dict:
+        """Esegue la logica del plugin."""
+
+class PluginManager:
+    """Gestore dei plugin con caricamento dinamico."""
+    
+    def load_plugin(self, plugin_path: Path) -> PluginInterface:
+        """Carica plugin da file."""
+        
+    def register_plugin(self, name: str, plugin: PluginInterface):
+        """Registra plugin nel sistema."""
+```
+
+#### **10. Metrics e Monitoring**
+
+**Classe per metriche**:
+```python
+class MetricsCollector:
+    """
+    Raccolta metriche performance e usage per ATLAS.
+    
+    Traccia tempi di esecuzione, successi/fallimenti,
+    utilizzo risorse e pattern di utilizzo.
+    """
+    
+    def track_execution_time(self, operation: str, duration: float):
+        """Traccia tempo di esecuzione operazione."""
+        
+    def track_user_choice(self, choice_type: str, choice_value: str):
+        """Traccia scelte utente per analytics."""
+```
+
+### **Linee Guida per Testing e Quality Assurance**
+
+#### **1. Testing Strategy Completa**
+
+```python
+# pytest.ini
+[tool:pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+addopts = --verbose --cov=atlas --cov-report=html --cov-report=term
+
+# Test Structure
+tests/
+├── unit/
+│   ├── test_agents/
+│   ├── test_models/
+│   ├── test_utils/
+│   └── test_validators/
+├── integration/
+│   ├── test_proxmox_integration.py
+│   ├── test_end_to_end.py
+│   └── test_workflow.py
+├── fixtures/
+│   ├── sample_configs/
+│   ├── mock_responses/
+│   └── test_data/
+└── conftest.py
+
+# Example Test Class
+class TestDataCollectorAgent:
+    """Test suite completa per DataCollectorAgent."""
+    
+    @pytest.fixture
+    def mock_config(self):
+        """Fixture per configurazione mock."""
+        return ATLASConfig.from_dict({
+            "proxmox": {"host": "test.example.com"},
+            "logging": {"level": "DEBUG"}
+        })
+    
+    @pytest.fixture
+    def agent(self, mock_config):
+        """Fixture per agente con configurazione mock."""
+        return DataCollectorAgent(mock_config)
+    
+    def test_collect_vm_count_valid(self, agent, monkeypatch):
+        """Test raccolta numero VM con input valido."""
+        monkeypatch.setattr('builtins.input', lambda _: '3')
+        count = agent._collect_vm_count()
+        assert count == 3
+    
+    def test_collect_vm_count_invalid_then_valid(self, agent, monkeypatch):
+        """Test gestione input non valido seguito da input valido."""
+        inputs = iter(['0', '51', '5'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        count = agent._collect_vm_count()
+        assert count == 5
+    
+    @pytest.mark.integration
+    def test_full_data_collection_workflow(self, agent, sample_user_inputs):
+        """Test workflow completo di raccolta dati."""
+        # Test con dati di esempio realistici
+        pass
+```
+
+#### **2. Code Quality Configuration**
+
+```toml
+# pyproject.toml
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["atlas"]
+
+[tool.pylint]
+load-plugins = ["pylint.extensions.docparams"]
+max-line-length = 88
+disable = [
+    "missing-docstring",  # Handled by custom rules
+    "too-few-public-methods",
+    "too-many-arguments"
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+```
+
+#### **3. CI/CD Pipeline Configuration**
+
+```yaml
+# .github/workflows/ci.yml
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.10, 3.11]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+    
+    - name: Lint with pylint
+      run: pylint atlas/
+    
+    - name: Type check with mypy
+      run: mypy atlas/
+    
+    - name: Test with pytest
+      run: pytest --cov=atlas --cov-report=xml
+    
+    - name: Security scan with bandit
+      run: bandit -r atlas/
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run integration tests
+      run: |
+        # Setup test Proxmox environment
+        # Run integration tests
+        pytest tests/integration/ -v
+```
+
+#### **4. Development Environment Setup**
+
+```dockerfile
+# Dockerfile.dev
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements-dev.txt .
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+# Setup development tools
+RUN pre-commit install
+
+# Copy source code
+COPY . .
+
+# Setup environment
+ENV PYTHONPATH=/app
+ENV ATLAS_LOG_LEVEL=DEBUG
+
+CMD ["python", "-m", "atlas.main"]
+```
+
+```yaml
+# docker-compose.dev.yml
+version: '3.8'
+services:
+  atlas-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - ~/.ssh:/root/.ssh:ro
+    environment:
+      - ATLAS_ENV=development
+    ports:
+      - "8000:8000"  # For optional web interface
+    
+  proxmox-mock:
+    image: wiremock/wiremock:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./tests/mocks:/home/wiremock
+```
+
+#### **5. Documentation Generation**
+
+```python
+# docs/conf.py for Sphinx
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../atlas'))
+
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
+    'sphinx_rtd_theme',
+    'myst_parser'
+]
+
+# Auto-generate API documentation
+autodoc_default_options = {
+    'members': True,
+    'member-order': 'bysource',
+    'special-members': '__init__',
+    'undoc-members': True,
+    'exclude-members': '__weakref__'
+}
+```
+
+### **Checklist Finale per Review**
+
+#### **✅ Requisiti Funzionali**
+- [x] Raccolta parametri utente strutturata e validata
+- [x] Generazione configurazioni Terraform per Proxmox
+- [x] Creazione playbook Ansible per software
+- [x] Sistema di documentazione automatica
+- [x] Monitoraggio e manutenzione integrati
+
+#### **✅ Requisiti Tecnici**
+- [x] Architettura multi-agente con AutoGen
+- [x] Gestione errori robusta e rollback
+- [x] Sistema di logging strutturato
+- [x] Configurazione sicura con secrets management
+- [x] Plugin system per estendibilità
+
+#### **✅ AI-Friendly Development**
+- [x] Classi e responsabilità ben definite
+- [x] Type hints completi per tutti i metodi
+- [x] Documentazione dettagliata per ogni classe
+- [x] Error handling con eccezioni specifiche
+- [x] Testing framework completo
+
+#### **✅ Manutenibilità**
+- [x] Single Responsibility Principle
+- [x] Dependency Injection pattern
+- [x] Configuration management centralizzato
+- [x] Code quality tools configurati
+- [x] CI/CD pipeline automatizzato
+
+#### **✅ Security & Best Practices**
+- [x] Gestione sicura delle credenziali
+- [x] Audit trail completo
+- [x] Validazione input rigorosa
+- [x] Rate limiting per API calls
+- [x] Security scanning automatico
+
+### **Raccomandazioni Finali per l'AI Agent**
+
+1. **Iniziare con MVP**: Implementare prima DataCollectorAgent e ValidationAgent
+2. **Test-Driven Development**: Scrivere test prima di implementare la logica
+3. **Iterative Refinement**: Migliorare iterativamente basandosi sui feedback
+4. **Documentation First**: Documentare ogni classe prima di implementarla
+5. **Error Handling**: Gestire esplicitamente ogni possibile errore
+6. **Type Safety**: Usare sempre type hints e validazione Pydantic
+
+**Il documento è ora completo e ottimizzato per sviluppo AI-assisted e manutenibilità a lungo termine.**
