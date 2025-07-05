@@ -15,11 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Development tooling setup (Black, Pylint, MyPy, Pytest)
 - Package configuration with pyproject.toml
 - Agent foundation structure for AutoGen integration
+- LLM integration with multi-provider support (OpenAI, Azure, Anthropic, Local)
+- Comprehensive API key management system
+- Configuration examples and environment templates
 
 ### Changed
 - Project structure reorganized for scalability
 - Documentation moved to dedicated `docs/` directory
 - Requirements consolidated and organized by purpose
+- **BREAKING**: Documentation restructured following industry standards
+- Root README simplified to project overview and quick start
+- `docs/README.md` converted to documentation navigation hub
+- Removed content duplication between README files
 
 ## [0.1.0] - 2025-07-05
 

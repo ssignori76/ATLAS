@@ -1,53 +1,108 @@
-# 🚀 ATLAS - Automated Template-based Logic for Administration Systems
+# � ATLAS Documentation
 
-[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Type Checking](https://img.shields.io/badge/type%20checking-mypy-blue.svg)](http://mypy-lang.org/)
-[![Development Status](https://img.shields.io/badge/status-MVP%20Ready-orange.svg)]()
+Welcome to the ATLAS documentation hub. This directory contains comprehensive guides, tutorials, and references for the ATLAS automated VM provisioning system.
 
-> **AI-Powered Multi-Agent System for Automated Proxmox VM Provisioning**
+## 🚀 Getting Started
 
-ATLAS leverages Microsoft AutoGen's multi-agent architecture to automate the complete lifecycle of virtual machine provisioning on Proxmox environments. Through intelligent conversation flows between specialized AI agents, ATLAS transforms user requirements into production-ready infrastructure.
+| Guide | Description | Audience |
+|-------|-------------|----------|
+| [**Quick Start**](../README.md#quick-start) | Get ATLAS running in 5 minutes | New Users |
+| [**API Key Management**](./api-key-management.md) | Configure LLM providers (OpenAI, Azure, Anthropic) | All Users |
+| [Installation Guide](./installation.md) | Detailed setup instructions | System Admins |
+| [Configuration Reference](./configuration.md) | Complete configuration options | DevOps Engineers |
 
-## 🎯 **Current Status: MVP Foundation Complete**
+## 🏗️ Architecture & Design
 
-✅ **Phase 1 Complete**: Full MVP infrastructure implemented  
-🚧 **Phase 2 In Progress**: AutoGen agents implementation  
-📋 **Next**: Interactive provisioning workflow  
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [Architecture Overview](./architecture.md) | System design and components | Developers |
+| [Agent System](./agents.md) | Multi-agent framework details | AI Engineers |
+| [Data Models](./data-models.md) | Core data structures and APIs | API Users |
+| [Extension Points](./extensions.md) | Plugin and customization system | Advanced Users |
+
+## 🛠️ Development
+
+| Guide | Description | Audience |
+|-------|-------------|----------|
+| [Development Setup](./development.md) | Local development environment | Contributors |
+| [Contributing Guide](../CONTRIBUTING.md) | How to contribute to ATLAS | Contributors |
+| [Testing Guide](./testing.md) | Testing strategy and best practices | Developers |
+| [Release Process](./release-process.md) | How we release new versions | Maintainers |
+
+## 📋 User Guides
+
+| Guide | Description | Use Case |
+|-------|-------------|----------|
+| [Basic Provisioning](./user-guide/basic-provisioning.md) | Create your first VM | Beginners |
+| [Advanced Scenarios](./user-guide/advanced-scenarios.md) | Complex multi-VM deployments | Power Users |
+| [Template System](./user-guide/templates.md) | Using and creating templates | Template Authors |
+| [Monitoring & Logging](./user-guide/monitoring.md) | Operational monitoring | Operations Teams |
+
+## 🚀 Deployment
+
+| Guide | Description | Environment |
+|-------|-------------|-------------|
+| [Production Deployment](./deployment/production.md) | Deploy ATLAS in production | Production |
+| [Docker Deployment](./deployment/docker.md) | Container-based deployment | Container Platforms |
+| [High Availability](./deployment/ha.md) | HA configuration for ATLAS | Enterprise |
+| [Security Hardening](./deployment/security.md) | Security best practices | Security Teams |
+
+## 🔧 Operations
+
+| Guide | Description | Audience |
+|-------|-------------|----------|
+| [Troubleshooting](./troubleshooting.md) | Common issues and solutions | Support Teams |
+| [Performance Tuning](./operations/performance.md) | Optimize ATLAS performance | Performance Engineers |
+| [Backup & Recovery](./operations/backup.md) | Data backup strategies | System Admins |
+| [Monitoring](./operations/monitoring.md) | System monitoring setup | DevOps Engineers |
+
+## 📖 Reference
+
+| Document | Description | Use Case |
+|----------|-------------|----------|
+| [CLI Reference](./reference/cli.md) | Complete command-line interface | CLI Users |
+| [API Reference](./reference/api.md) | Python API documentation | API Developers |
+| [Configuration Schema](./reference/config-schema.md) | YAML configuration reference | Configuration Management |
+| [Agent Protocol](./reference/agent-protocol.md) | Inter-agent communication | Agent Developers |
+
+## 📝 Examples & Tutorials
+
+| Example | Description | Complexity |
+|---------|-------------|------------|
+| [Single Web Server](./examples/web-server.md) | Deploy a simple web server | Beginner |
+| [Development Environment](./examples/dev-environment.md) | Multi-service dev stack | Intermediate |
+| [Database Cluster](./examples/database-cluster.md) | High-availability PostgreSQL | Advanced |
+| [Microservices Platform](./examples/microservices.md) | Complete platform deployment | Expert |
+
+## 🎯 Project Information
+
+| Document | Description |
+|----------|-------------|
+| [**Requirements**](./requirements/) | Original project requirements and specifications |
+| [**Changelog**](../CHANGELOG.md) | Version history and changes |
+| [**Roadmap**](./roadmap.md) | Future development plans |
+| [**FAQ**](./faq.md) | Frequently asked questions |
+
+## 🤝 Community
+
+- **Issues**: [GitHub Issues](https://github.com/ssignori76/ATLAS/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/ssignori76/ATLAS/discussions) *(coming soon)*
+- **Contributing**: [Contributing Guide](../CONTRIBUTING.md)
+- **Code of Conduct**: [Code of Conduct](../CODE_OF_CONDUCT.md) *(coming soon)*
+
+## 📄 Legal
+
+- **License**: [MIT License](../LICENSE) *(coming soon)*
+- **Security Policy**: [Security Policy](../SECURITY.md) *(coming soon)*
+- **Privacy Policy**: [Privacy Policy](./legal/privacy.md) *(coming soon)*
 
 ---
 
-## 🌟 **What ATLAS Does**
+> � **Can't find what you're looking for?** 
+> Check the [FAQ](./faq.md) or [open an issue](https://github.com/ssignori76/ATLAS/issues/new) for help.
 
-```mermaid
-graph TD
-    A[User Input] --> B[Data Collector Agent]
-    B --> C[Validation Agent]
-    C --> D[Proxmox Config Agent]
-    D --> E[Software Provision Agent]
-    E --> F[Documentation Agent]
-    F --> G[Generated Output]
-    G --> H[Terraform Configs]
-    G --> I[Ansible Playbooks]
-    G --> J[Documentation]
-```
-
-### **Intelligent Workflow**
-1. **🗣️ Interactive Collection**: Guided conversation to gather VM requirements
-2. **✅ Smart Validation**: AI-powered validation of configurations and constraints  
-3. **⚙️ Auto-Generation**: Creates Terraform configs, Ansible playbooks, and documentation
-4. **📊 Rich Documentation**: Comprehensive setup guides and operational runbooks
-5. **🛡️ Safety First**: Dry-run mode and validation before any actual changes
-
----
-
-## 🚀 **Quick Start**
-
-### **Installation**
-
-```bash
-# Clone the repository
+> 📝 **Want to improve these docs?** 
+> See our [Contributing Guide](../CONTRIBUTING.md) for documentation contribution guidelines.
 git clone https://github.com/ssignori76/ATLAS.git
 cd ATLAS
 

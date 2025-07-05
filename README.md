@@ -1,103 +1,191 @@
 # 🚀 ATLAS - Automated Template-based Logic for Administration Systems
 
-**ATLAS** è un sistema avanzato bassu su **Microsoft AutoGen** per l'automazione della creazione e configurazione di macchine virtuali su **Proxmox VE** attraverso un'interfaccia conversazionale intelligente.
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Development Status](https://img.shields.io/badge/status-MVP%20Ready-orange.svg)]()
 
-## 📋 Indice
+> **AI-Powered Multi-Agent System for Automated Proxmox VM Provisioning**
 
-- [Panoramica](#-panoramica)
-- [Caratteristiche Principali](#-caratteristiche-principali)
-- [Architettura](#-architettura)
-- [Requisiti di Sistema](#-requisiti-di-sistema)
-- [Installazione](#-installazione)
-- [Utilizzo Rapido](#-utilizzo-rapido)
-- [Configurazione](#-configurazione)
-- [Esempi d'Uso](#-esempi-duso)
-- [Sviluppo](#-sviluppo)
-- [Documentazione](#-documentazione)
-- [Contribuire](#-contribuire)
-- [Licenza](#-licenza)
+ATLAS leverages Microsoft AutoGen's multi-agent architecture to automate the complete lifecycle of virtual machine provisioning on Proxmox environments. Through intelligent conversation flows between specialized AI agents, ATLAS transforms user requirements into production-ready infrastructure.
 
-## 🎯 Panoramica
+## 🎯 What ATLAS Does
 
-ATLAS automatizza completamente il processo di:
+```mermaid
+graph TD
+    A[User Input] --> B[Data Collector Agent]
+    B --> C[Validation Agent]
+    C --> D[Proxmox Config Agent]
+    D --> E[Software Provision Agent]
+    E --> F[Documentation Agent]
+    F --> G[Generated Output]
+    G --> H[Terraform Configs]
+    G --> I[Ansible Playbooks]
+    G --> J[Documentation]
+```
 
-- **Raccolta parametri** attraverso conversazione guidata
-- **Validazione** di risorse e configurazioni
-- **Generazione** di configurazioni Terraform per Proxmox
-- **Creazione** di playbook Ansible per installazione software
-- **Documentazione** automatica di tutto il deployment
-- **Monitoraggio** e script di manutenzione
+### Intelligent Workflow
+1. **🗣️ Interactive Collection**: Guided conversation to gather VM requirements
+2. **✅ Smart Validation**: AI-powered validation of configurations and constraints  
+3. **⚙️ Auto-Generation**: Creates Terraform configs, Ansible playbooks, and documentation
+4. **📊 Rich Documentation**: Comprehensive setup guides and operational runbooks
+5. **🛡️ Safety First**: Dry-run mode and validation before any actual changes
 
-### 🎬 Demo Rapida
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
-# Installazione rapida
+# Clone the repository
 git clone https://github.com/ssignori76/ATLAS.git
 cd ATLAS
+
+# Install dependencies
 pip install -r requirements.txt
 
-# Avvio sistema
-python -m atlas.main
-
-# Segui la conversazione guidata...
-# ✅ Configurazioni generate in ./output/
+# Configure your environment (see Configuration section)
+cp .env.example .env
+# Edit .env with your Proxmox and LLM credentials
 ```
 
-## ✨ Caratteristiche Principali
+### Basic Usage
 
-### 🤖 Agenti AI Specializzati
-- **DataCollectorAgent**: Raccolta parametri utente con validazione
-- **ValidationAgent**: Verifica risorse e coerenza configurazioni  
-- **ProxmoxConfigAgent**: Generazione Terraform per Proxmox
-- **SoftwareProvisionAgent**: Creazione playbook Ansible
-- **DocumentationAgent**: Documentazione automatica
-- **OrchestratorAgent**: Coordinamento workflow
+```bash
+# Start the interactive provisioning workflow
+python -m atlas.cli provision
 
-### 🛡️ Sicurezza e Robustezza
-- Gestione sicura credenziali (HashiCorp Vault support)
-- Validazione rigorosa di tutti i parametri
-- Audit trail completo delle operazioni
-- Rollback automatico in caso di errori
-- Rate limiting per API Proxmox
-
-### 🔧 Estendibilità
-- Sistema plugin per nuovi agenti
-- Template engine personalizzabile
-- Profili predefiniti per scenari comuni
-- Hook system per customizzazioni
-
-### 📊 Monitoraggio
-- Logging strutturato in JSON
-- Metriche di performance e usage
-- Health check automatici
-- Script di backup e manutenzione
-
-## 🏗️ Architettura
-
+# Or use specific commands
+python -m atlas.cli validate --config myvm.yaml
+python -m atlas.cli generate --output ./infrastructure/
 ```
-ATLAS System Architecture
 
-    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-    │  User Interface │───▶│  Orchestrator   │───▶│   Output Mgmt   │
-    │  (Conversational)│    │     Agent       │    │   & Documentation│
-    └─────────────────┘    └─────────────────┘    └─────────────────┘
-             │                       │                       │
-             ▼                       ▼                       ▼
-    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-    │ Data Collector  │    │   Validation    │    │   Proxmox      │
-    │     Agent       │───▶│     Agent       │───▶│  Config Agent   │
-    └─────────────────┘    └─────────────────┘    └─────────────────┘
-                                    │                       │
-                                    ▼                       ▼
-                           ┌─────────────────┐    ┌─────────────────┐
-                           │   Software      │    │   Terraform     │
-                           │ Provision Agent │    │   Generation    │
-                           └─────────────────┘    └─────────────────┘
-                                    │                       │
-                                    ▼                       ▼
-                           ┌─────────────────┐    ┌─────────────────┐
-                           │    Ansible      │    │     Proxmox     │
-                           │   Generation    │    │     Cluster     │
+### Your First VM
+
+```python
+from atlas.core import get_config
+from atlas.agents import OrchestrationAgent
+
+# Initialize ATLAS
+config = get_config()
+orchestrator = OrchestrationAgent(config)
+
+# Start interactive provisioning
+result = await orchestrator.provision_vm(
+    conversation_mode=True,
+    output_dir="./my-infrastructure"
+)
+
+print(f"✅ Generated configs in: {result.output_path}")
+```
+
+## ✨ Key Features
+
+- **🤖 AI-Driven Conversations**: Natural language interaction for requirement gathering
+- **🔧 Multi-Provider Support**: Proxmox VE with extensible architecture  
+- **📋 Smart Templates**: Pre-configured templates for common scenarios
+- **🛡️ Production Ready**: Comprehensive validation, logging, and error handling
+- **📊 Auto Documentation**: Generated runbooks and operational guides
+- **� GitOps Ready**: Version-controlled infrastructure as code
+
+## 📋 Configuration
+
+ATLAS supports multiple configuration methods:
+
+### Environment Variables (Recommended)
+```bash
+# Proxmox Configuration
+export ATLAS_PROXMOX_HOST="proxmox.example.com"
+export ATLAS_PROXMOX_USER="atlas@pve"
+export ATLAS_PROXMOX_PASSWORD="your-password"
+
+# LLM Configuration (supports OpenAI, Azure, Anthropic, Local)
+export ATLAS_LLM_PROVIDER="openai"
+export ATLAS_LLM_API_KEY="sk-your-api-key"
+export ATLAS_LLM_MODEL_NAME="gpt-4"
+```
+
+### Configuration File
+```yaml
+# atlas.yaml
+proxmox:
+  host: "proxmox.example.com"
+  user: "atlas@pve"
+  
+llm:
+  provider: "openai"
+  model_name: "gpt-4"
+  temperature: 0.7
+
+vm_defaults:
+  memory: 2048
+  cores: 2
+  disk_size: "20G"
+```
+
+See the [API Key Management Guide](docs/api-key-management.md) for detailed configuration options.
+
+## 🎮 Example Scenarios
+
+### Web Server Deployment
+```bash
+atlas provision --template web-server --domain myapp.com
+# → Generates: VM + Nginx + SSL + Monitoring
+```
+
+### Development Environment
+```bash
+atlas provision --template dev-stack --languages python,nodejs
+# → Generates: VM + Docker + Dev tools + VS Code Server
+```
+
+### Database Cluster
+```bash
+atlas provision --template postgres-ha --replicas 3
+# → Generates: 3 VMs + PostgreSQL + Replication + Backup
+```
+
+## 📚 Documentation
+
+- **[Complete Documentation](docs/)** - Comprehensive guides and tutorials
+- **[API Key Management](docs/api-key-management.md)** - LLM provider configuration
+- **[Architecture Overview](docs/architecture.md)** - System design and components
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to ATLAS
+
+## 🛠️ Development Status
+
+| Component | Status | Description |
+|-----------|--------|-------------|
+| **Core Framework** | ✅ Complete | Configuration, logging, data models |
+| **LLM Integration** | ✅ Complete | Multi-provider support (OpenAI, Azure, Anthropic) |
+| **Agent Framework** | ✅ Complete | Base classes and communication protocols |
+| **CLI Interface** | 🚧 In Progress | Command-line interface |
+| **Interactive Agents** | 🚧 Next | AutoGen-powered conversation flow |
+| **Terraform Generation** | 🚧 Next | Proxmox infrastructure templates |
+| **Ansible Integration** | 🚧 Next | Software provisioning playbooks |
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Setting up the development environment
+- Code style and testing guidelines  
+- Submitting pull requests
+- Community guidelines
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- **Repository**: [https://github.com/ssignori76/ATLAS](https://github.com/ssignori76/ATLAS)
+- **Documentation**: [docs/](docs/)
+- **Issues**: [GitHub Issues](https://github.com/ssignori76/ATLAS/issues)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
+
+---
+
+⭐ **Star this repository** if you find ATLAS useful!
                            └─────────────────┘    └─────────────────┘
 ```
 
